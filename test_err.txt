@@ -1,0 +1,4 @@
+MAT A =
+OUT = A
+A = TRAN(A)
+OUT = A
