@@ -35,6 +35,14 @@ typedef struct{
     short c;
 } vec_line;
 
+typedef struct{
+    /*row is an array of doubles, max_val is a double pointer*/
+    double* row;
+    double* max_val;
+    short i;
+    short N;
+} vec_max;
+
 Mat* arr_constructor(short row, short col, double* arr);
 Mat* zero_constructor(short row, short col);
 void unravel_mat(Mat* mat);
@@ -56,6 +64,7 @@ void *vec_mult(void *pair);
 void* vec_add(void *pair);
 void* vec_compress(void* pair);
 void* line_transpose(void* line);
+void* row_max(void* line)
 
 /*Gauss.c functions*/
 Mat* elimination(Mat* mat);

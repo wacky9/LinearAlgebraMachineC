@@ -1,5 +1,6 @@
 #include "lin_alg_mac.h"
-
+#include <math.h>
+#include <pthread.h>
 /*mat is an augmented matrix. Returns a row-reduced matrix*/
 Mat* elimination(Mat* mat){
    Mat* newMat = sub_matrix(mat,mat->row,mat->col,0,0);
@@ -39,7 +40,40 @@ Mat* backsubstitution(Mat* mat){
     return results;
 }
 
-/*Requires an augmented matrix*/
-Mat* scaled_partial_pivoting(Mat* mat){
-    
+/*Requires an augmented matrix
+  Returns the index of the row to be swapped with row i*/
+short scaled_partial_pivoting(short i, Mat* mat){
+    double* max_vector = row_maxes(i,mat);
+    short pivot_row = i;
+    double pivot = fabs(mat->matrix[i][i])/max_vector[0];
+    for(j = i+1; j<mat->row; j++){
+        double test_pivot= fabs(mat->matrix[j][i])/max_vector[j-i];
+        if(pivot < test_pivot){
+            pivot = test_pivot;
+            pivot_row = j;
+        }
+    }
+    return pivot_row;
+}
+
+/*Returns an array of the maximum values in each row starting at row i and only going from col i to end of the row*/
+double* row_maxes(short i, Mat* mat){
+    /*Start at i-th row*/
+    short row_num = mat->row - i;
+    double* maxes = (double*)calloc(row_num,sizeof(double));
+    pthread_t p[row_num];
+    for(int j = 0; j<row_num; j++){
+        vec_max* vm = (vec_max*)calloc(1,sizeof(vec_max));
+        /*i is the column to start at, N is the column to stop at*/
+        vm->i = i;
+        vm->N = mat->col;
+        vm->max_val = &maxes[j];
+        /*Need to add i to account for offset*/
+        vm->row = mat->matrix[j+i];
+		pthread_create(&p[j], NULL, vec_mult, (void*)newPair);
+	}
+	for(int a = 0; a<row_num; a++){
+		pthread_join(p[a], NULL);
+	}
+    return maxes;
 }
